@@ -1,0 +1,84 @@
+-- 1. Önkormányzatok tábla
+CREATE TABLE Onkormanyzat (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nev TEXT NOT NULL,
+    email TEXT,
+    telefonszam TEXT,
+    cim TEXT,
+    kapcsolattarto_neve TEXT
+);
+
+-- 2. Hibatípusok tábla
+CREATE TABLE Hibatipus (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    megnevezes TEXT NOT NULL,
+    kategoria TEXT
+);
+
+-- 3. Eszközök tábla
+CREATE TABLE Eszkoz (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    onkormanyzat_id INTEGER NOT NULL,
+    eszkoz_neve TEXT NOT NULL,
+    leltari_szam INTEGER,
+    beszerzes_datuma TEXT,
+    eszkoz_leirasa TEXT,
+    tipus TEXT,
+    FOREIGN KEY (onkormanyzat_id) REFERENCES Onkormanyzat(id)
+);
+
+-- 4. Felhasználók tábla
+CREATE TABLE Felhasznalo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    onkormanyzat_id INTEGER NOT NULL,
+    nev TEXT NOT NULL,
+    email TEXT,
+    telefonszam TEXT,
+    felhasznaloi_szint INTEGER NOT NULL,
+    bejelentkezesi_azonosito TEXT NOT NULL UNIQUE,
+    FOREIGN KEY (onkormanyzat_id) REFERENCES Onkormanyzat(id)
+);
+
+-- 5. Karbantartások tábla
+CREATE TABLE Karbantartas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    eszkoz_id INTEGER NOT NULL,
+    tervezett_datum TEXT NOT NULL,
+    vegrehajtas_datuma TEXT,
+    leiras TEXT,
+    FOREIGN KEY (eszkoz_id) REFERENCES Eszkoz(id)
+);
+
+-- 6. Belépési azonosítók tábla
+CREATE TABLE Belepesi_azonosito (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    eszkoz_id INTEGER NOT NULL,
+    rendszer_neve TEXT NOT NULL,
+    belepesi_azonosito TEXT NOT NULL,
+    jelszo TEXT NOT NULL,
+    FOREIGN KEY (eszkoz_id) REFERENCES Eszkoz(id)
+);
+
+-- 7. Hibabejelentések tábla
+CREATE TABLE Hibabejelentes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    felhasznalo_id INTEGER NOT NULL,
+    eszkoz_id INTEGER NOT NULL,
+    hibatipus_id INTEGER,
+    egyedi_komment TEXT,
+    bejelentes_datuma TEXT NOT NULL,
+    allapot TEXT NOT NULL,
+    elharitas_datuma TEXT,
+    FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id),
+    FOREIGN KEY (eszkoz_id) REFERENCES Eszkoz(id),
+    FOREIGN KEY (hibatipus_id) REFERENCES Hibatipus(id)
+);
+
+-- 8. Hibakezelési lépések tábla
+CREATE TABLE Hibakezeles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hibabejelentes_id INTEGER NOT NULL,
+    datum TEXT NOT NULL,
+    lepes_leirasa TEXT NOT NULL,
+    FOREIGN KEY (hibabejelentes_id) REFERENCES Hibabejelentes(id)
+);
