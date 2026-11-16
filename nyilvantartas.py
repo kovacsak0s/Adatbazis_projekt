@@ -4,11 +4,11 @@ con = sqlite3.connect("szamitogepesrendszerek.db")
 cur = con.cursor()
 
 data2 = []         # Az utoljára listázott dalok tárolása a lejátszáshoz
-current_user = None  # A bejelentkezett felhasználó adatai
+jelenlegi_felhasznalo = None  # A bejelentkezett felhasználó adatai
 
 
-def login():
-    global current_user
+def belepes():
+    global jelenlegi_felhasznalo
     felhasznalonev = str(input("Név: "))
     jelszo = str(input("Jelszó: "))
 
@@ -21,67 +21,174 @@ def login():
     loginData = res.fetchall()
 
     if len(loginData) > 0:
-        current_user = loginData[0]
-        print(f"\nSikeres bejelentkezés: {current_user[0]}")
-        print("=================================\n")
+        jelenlegi_felhasznalo = loginData[0]
+        print(f"\nSikeresen bejelentkezve mint: {jelenlegi_felhasznalo[0]} \n")
         return True
     else:
         print("Helytelen belépési adatok")
         return False
 
+def kilepes():
+    print("Kilépés...")
+    return False
+
+def uj_onkormanyzat_rogzitese():
+    print("-----------------------------------")
+    print("Adja meg az új önkormányzat adatait")
+    print("-----------------------------------")
+
+    while True:
+        u_onkormanyzat_nev = input("Adja meg az önkormányzat nevét: ").strip()
+
+        if not u_onkormanyzat_nev:
+            print("\nMeg kell adni az önkormányzat nevét! Próbálja újra.\n")
+            continue
+
+        res = cur.execute("SELECT id FROM Onkormanyzat WHERE nev = ?", (u_onkormanyzat_nev,))
+        if res.fetchone() is not None:
+            print("\nMár létezik ilyen nevű önkormányzat! Adjon meg másikat.\n")
+            continue
+
+        break
+
+    u_onkormanyzat_email = input("Adja meg az önkormányzat e-mail címét: ").strip() or None
+    u_onkormanyzat_telefonszam = input("Adja meg az önkormányzat telefonszámát: ").strip() or None
+    u_onkormanyzat_cim = input("Adja meg az önkormányzat címét: ").strip() or None
+    u_onkormanyzat_kapcsolattarto = input("Adja meg az önkormányzat kapcsolattartójának nevét: ").strip() or None
+
+    cur.execute(
+        "INSERT INTO Onkormanyzat (nev, email, telefonszam, cim, kapcsolattarto_neve) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (u_onkormanyzat_nev, u_onkormanyzat_email, u_onkormanyzat_telefonszam, u_onkormanyzat_cim,
+         u_onkormanyzat_kapcsolattarto))
+    con.commit()
+    print("\nSikeresen felvette az új önkormányzatot!\n")
+
+def onkormanyzatok_listaja():
+    print()
+    res = cur.execute("SELECT nev FROM Onkormanyzat")
+    onkormanyzatok = res.fetchall()
+    for onkormanyzat in onkormanyzatok:
+        print(onkormanyzat[0])
+
+def uj_eszkoz_rogzitese():
+    onkormanyzatok_listaja()
+
+    while True:
+        keresett_onkormanyzat = input("\nAdja meg az önkormányzat nevét, ahol az eszköz található: ").strip()
+        res = cur.execute("SELECT id FROM Onkormanyzat WHERE nev = ?", (keresett_onkormanyzat,))
+        talalat = res.fetchone()
+
+        if talalat is not None:
+            onkormanyzat_id = talalat[0]
+            break
+        else:
+            print("Hiba: Nem található ilyen nevű önkormányzat! Próbálja újra.")
+
+
+
+    while True:
+        u_eszkoz_neve = input("Eszköz neve: ").strip()
+        if u_eszkoz_neve:
+            break
+        print("Hiba: Az eszköz nevét kötelező megadni!")
+
+
+    while True:
+        try:
+            u_leltari_szam = int(input("Leltári szám: ").strip())
+            break
+        except ValueError:
+            print("A leltári számnak egész számnak kell lennie!")
+
+    u_beszerzes_datuma = input("Eszköz beszerzésének dátuma (ÉÉÉÉ-HH-NN): ").strip() or None
+    u_eszkoz_leirasa = input("Eszköz leírása: ").strip() or None
+    u_tipus = input("Eszköz típus: ").strip() or None
+
+    cur.execute(
+        "INSERT INTO Eszkoz (onkormanyzat_id, eszkoz_neve, leltari_szam, beszerzes_datuma, eszkoz_leirasa, tipus) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+    (onkormanyzat_id, u_eszkoz_neve, u_leltari_szam, u_beszerzes_datuma, u_eszkoz_leirasa, u_tipus)
+    )
+    con.commit()
+    print("\nEszköz sikeresen rögzítve!\n")
+
 def fomenu():
     print("Belépés")
-    if not login():  # Ha sikertelen a belépés, azonnal kilép a programból
+    if not belepes():
         con.close()
         return
 
-    menu_actions = {
-        1: 'asd',
-    }
-
-    running = True
-    while running:
-        if current_user[4] == 1:
+    felhasznaloi_szinthez_tartozo_lehetosegek = 0
+    adott_felhasznalohoz_tartozo_menu = {}
+    fut = True
+    while fut:
+        if jelenlegi_felhasznalo[4] == 1:
             print("1. Új önkormányzat rögzítése")
             print("2. Új eszköz rögzítése")
             print("3. Új felhasználó hozzáadása")
             print("4. Meglévő felhasználók adatainak szerkesztése")
             print("5. Tervezett karbantartások kezelése")
             print("6. Bejelentett hibák kezelése")
+            print("7. Kilépés")
+            felhasznaloi_szinthez_tartozo_lehetosegek = 7
 
-            menu1 = {
-                1: 'asd',
+            adott_felhasznalohoz_tartozo_menu = {
+                1: uj_onkormanyzat_rogzitese,
+                2: uj_eszkoz_rogzitese,
+                # 3: uj_felhasznalo_hozzaadasa,
+                # 4: meglevo_felhasznalok_szerkesztese,
+                # 5: tervezett_karbantartasok_kezelese,
+                # 6: bejelentett_hibak_kezelese,
+                7: kilepes,
             }
 
-        elif current_user[4] == 2:
+        elif jelenlegi_felhasznalo[4] == 2:
             print("1. Önkormányzat dolgozóinak megtekintése")
             print("2. Önkormányzat eszközeinek megtekintése")
             print("3. Hibabejelentés")
             print("4. Új felhasználó felvétele az önkormányzathoz")
             print("5. Bejelentett hibák állapotának megtekintése")
+            print("6. Kilépés")
+            felhasznaloi_szinthez_tartozo_lehetosegek = 6
 
+            adott_felhasznalohoz_tartozo_menu = {
+                # 1: ,
+                # 2: ,
+                # 3: ,
+                # 4: uj_felhasznalo_hozzaadasa,
+                # 5: ,
+                6: kilepes,
+            }
 
-        elif current_user[4] == 3:
+        elif jelenlegi_felhasznalo[4] == 3:
             print("1. Önkormányzat dolgozóinak megtekintése")
             print("2. Önkormányzat eszközeinek megtekintése")
+            print("3. Kilépés")
+            felhasznaloi_szinthez_tartozo_lehetosegek = 3
+
+            adott_felhasznalohoz_tartozo_menu = {
+                # 1: ,
+                # 2: ,
+                3: kilepes,
+            }
 
         try:
-            choice = int(input("Válasszon a megadott menüpontok közül: "))
+            valasztas = int(input(f"\nVálasszon a megadott menüpontok közül (1-{felhasznaloi_szinthez_tartozo_lehetosegek}): "))
         except ValueError:
+            print("\n****************************")
             print("Kérjük egy számot adjon meg!")
-            print("=================================\n")
+            print("****************************\n")
             continue
 
-        print("=================================\n")
-
-        action = menu_actions.get(choice)
-        if action:
-            if action() is False:
-                running = False
+        milyen_felhasznalo = adott_felhasznalohoz_tartozo_menu.get(valasztas)
+        if milyen_felhasznalo:
+            if milyen_felhasznalo() is False:
+                fut = False
         else:
-            print("\n///////////////////////////")
+            print("\n********************")
             print("Nem létező menüpont!")
-            print("///////////////////////////\n")
+            print("********************\n")
 
 fomenu()
 
