@@ -82,3 +82,72 @@ CREATE TABLE Hibakezeles (
     lepes_leirasa TEXT NOT NULL,
     FOREIGN KEY (hibabejelentes_id) REFERENCES Hibabejelentes(id)
 );
+-------------------------------------------------------------------------------------------------------------
+-- 1. Onkormanyzat feltöltése (Vas vármegyei települések)
+INSERT INTO Onkormanyzat (id, nev, email, telefonszam, cim, kapcsolattarto_neve) VALUES
+(1, 'Szombathely Megyei Jogú Város Önkormányzata', 'hivatal@szombathely.hu', '+36 94 520 100', '9700 Szombathely, Kossuth Lajos utca 1-3.', 'Dr. Kovács Zoltán'),
+(2, 'Sárvár Város Önkormányzata', 'onkormanyzat@sarvar.hu', '+36 95 320 200', '9600 Sárvár, Várkerület 2.', 'Nagy Eszter'),
+(3, 'Kőszeg Város Önkormányzata', 'hivatal@koszeg.hu', '+36 94 562 511', '9730 Kőszeg, Jurisics tér 8.', 'Horváth Gábor'),
+(4, 'Körmend Város Önkormányzata', 'titkarsag@kormend.hu', '+36 94 592 900', '9900 Körmend, Szabadság tér 7.', 'Tóth Andrea'),
+(5, 'Celldömölk Város Önkormányzata', 'hivatal@celldomolk.hu', '+36 95 525 010', '9500 Celldömölk, Városháza tér 1.', 'Szabó Péter'),
+(6, 'Szentgotthárd Város Önkormányzata', 'onkormanyzat@szentgotthard.hu', '+36 94 553 000', '9970 Szentgotthárd, Széll Kálmán tér 11.', 'Varga Katalin');
+
+-- 2. Felhasznalo feltöltése (1-es szintű rendszergazda nélkül; 2 = bejelentő, 3 = önkormányzati dolgozó)
+INSERT INTO Felhasznalo (id, onkormanyzat_id, nev, email, telefonszam, felhasznaloi_szint, bejelentkezesi_azonosito) VALUES
+(2, 1, 'Kiss Tamás', 'kiss.tamas@szombathely.hu', '+36 30 412 8891', 2, 'ktamas_szombathely'),
+(3, 1, 'Molnár Judit', 'molnar.judit@szombathely.hu', '+36 20 554 1920', 3, 'mjudit_szombathely'),
+(4, 2, 'Farkas Balázs', 'farkas.balazs@sarvar.hu', '+36 70 331 7402', 2, 'fbalazs_sarvar'),
+(5, 2, 'Németh Ilona', 'nemeth.ilona@sarvar.hu', '+36 30 982 1145', 3, 'nilona_sarvar'),
+(6, 3, 'Balogh László', 'balogh.laszlo@koszeg.hu', '+36 20 841 6630', 2, 'blaszlo_koszeg'),
+(7, 3, 'Takács Zsuzsanna', 'takacs.zsuzsanna@koszeg.hu', '+36 30 219 4508', 3, 'tzsuzsa_koszeg'),
+(8, 4, 'Papp Gergely', 'papp.gergely@kormend.hu', '+36 70 615 3390', 2, 'pgergely_kormend'),
+(9, 4, 'Lakatos Éva', 'lakatos.eva@kormend.hu', '+36 20 773 9012', 3, 'leva_kormend'),
+(10, 5, 'Mészáros Attila', 'meszaros.attila@celldomolk.hu', '+36 30 644 2819', 2, 'mattila_celldomolk'),
+(11, 6, 'Simon Krisztina', 'simon.krisztina@szentgotthard.hu', '+36 70 509 8741', 3, 'skrisztina_szgotthard');
+
+-- 3. Eszkoz feltöltése
+INSERT INTO Eszkoz (id, onkormanyzat_id, eszköz_neve, leltari_szam, beszerzes_datuma, eszköz_leirasa, tipus) VALUES
+(1, 1, 'Dell OptiPlex 7090 Munkaállomás', 100451, '2023-05-12', 'Irodai asztali számítógép, Intel i7, 16GB RAM, iktatóiroda', 'Számítógép'),
+(2, 1, 'HP LaserJet Enterprise M507dn', 100452, '2022-11-20', 'Nagy teljesítményű hálózati lézernyomtató, pénzügyi osztály', 'Nyomtató'),
+(3, 1, 'MikroTik CCR2004 Router', 100453, '2024-01-15', 'Központi gerinchálózati router a szerverszobában', 'Hálózati eszköz'),
+(4, 2, 'Lenovo ThinkPad T14 Gen 3', 200112, '2023-09-04', 'Hivatali laptop külső terepmunkához és ülésekhez', 'Laptop'),
+(5, 2, 'Konica Minolta bizhub C250i', 200115, '2021-06-18', 'Színes multifunkciós fénymásoló és szkenner', 'Multifunkciós nyomtató'),
+(6, 3, 'Dell PowerEdge T350 Szerver', 300089, '2023-03-22', 'Helyi fájlszerver és adatbázis-kiszolgáló', 'Szerver'),
+(7, 4, 'ASUS ExpertCenter D7', 400310, '2024-02-10', 'Anyakönyvi hivatal munkaállomása', 'Számítógép'),
+(8, 5, 'Cisco Catalyst 2960-X Switch', 500044, '2022-04-30', '24 portos menedzselhető hálózati kapcsoló', 'Hálózati eszköz'),
+(9, 6, 'Canon imageRUNNER 2625i', 600198, '2023-07-14', 'Ügyfélszolgálati nyomtatási és szkennelési központ', 'Multifunkciós nyomtató');
+
+-- 4. Belepesi_azonosito feltöltése (sima szöveges jelszavakkal)
+INSERT INTO Belepesi_azonosito (id, eszkoz_id, rendszer_neve, belepesi_azonosito, jelszo) VALUES
+(1, 1, 'Windows 11 Pro Helyi Admin', 'szombathely_admin', 'Szombathely2024!'),
+(2, 2, 'HP Webes Admin Felület', 'admin', 'Nyomtato9700'),
+(3, 3, 'RouterOS WinBox', 'netadmin', 'MikroTikVas94'),
+(4, 4, 'BitLocker Helyreállító Kulcs', 'sarvar_laptop01', 'SarvarVar2023'),
+(5, 6, 'iDRAC9 Szerver Menedzsment', 'root', 'KoszegSzerver88'),
+(6, 8, 'Cisco IOS Konzol', 'cisco_admin', 'CellSwitch24');
+
+-- 5. Karbantartas feltöltése
+INSERT INTO Karbantartas (id, eszkoz_id, tervezett_datum, vegrehajtas_datuma, leiras) VALUES
+(1, 2, '2026-03-15', '2026-03-15', 'Toner csere, fixáló egység tisztítása és papíradagoló görgők ellenőrzése.'),
+(2, 3, '2026-06-10', '2026-06-12', 'RouterOS firmware frissítése és tűzfalszabályok felülvizsgálata.'),
+(3, 6, '2026-09-01', '2026-09-01', 'RAID tömb ellenőrzése, portalanítás és szünetmentes tápegység tesztelése.'),
+(4, 5, '2026-11-25', NULL, 'Éves kötelező szerviz és dobegység csere előkészítése.'),
+(5, 1, '2026-12-05', NULL, 'Windows biztonsági frissítések telepítése és lemezkarbantartás.');
+
+-- 6. Hibatipus feltöltése (előre megadott hibatípusok)
+INSERT INTO Hibatipus (id, megnevezes, kategoria) VALUES
+(1, 'Nem kapcsol be / Tápellátási hiba', 'Hardver'),
+(2, 'Papírelakadás / Nyomtatási csíkozás', 'Nyomtató'),
+(3, 'Nincs internet- vagy belső hálózati kapcsolat', 'Hálózat'),
+(4, 'Operációs rendszer lefagyása / Kékhalál', 'Szoftver'),
+(5, 'Elfelejtett jelszó / Jogosultsági probléma', 'Hozzáférés'),
+(6, 'Lassú működés / Tárhely megtelt', 'Szoftver');
+
+-- 7. Hibabejelentes feltöltése (állapotok: 'Nyitott', 'Folyamatban', 'Lezárt')
+INSERT INTO Hibabejelentes (id, felhasznalo_id, eszkoz_id, hibatipus_id, egyedi_komment, bejelentes_datuma, allapot, elharitas_datuma) VALUES
+(1, 3, 2, 2, 'A pénzügyi osztályon a nyomtató folyamatosan begyűri az A4-es lapokat a hátsó tálcánál.', '2026-10-05', 'Lezárt', '2026-10-06'),
+(2, 5, 4, 3, 'Wi-Fi-re csatlakozva nem éri el a belső hálózati meghajtót a testületi teremben.', '2026-10-18', 'Lezárt', '2026-10-19'),
+(3, 7, 6, 6, 'A közös hálózati megosztáson kevés a szabad hely, lassan mentenek az irodai programok.', '2026-11-02', 'Folyamatban', NULL),
+(4, 9, 7, 4, 'Ügyfélfogadás közben kétszer is újraindult a gép kék képernyővel.', '2026-11-12', 'Folyamatban', NULL),
+(5, 11, 9, NULL, 'A szkennelés e-mailbe funkció nem küldi el a beszkennelt dokumentumokat a címzetteknek.', '2026-11-15', 'Nyitott', NULL),
+(6, 2, 1, 1, 'Reggel óta nem reagál a bekapcsológombra, a monitor sem kap jelet.', '2026-11-16', 'Nyitott', NULL);
