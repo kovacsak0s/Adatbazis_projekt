@@ -48,12 +48,19 @@ def fomenu():
             print("4. Meglévő felhasználók adatainak szerkesztése")
             print("5. Tervezett karbantartások kezelése")
             print("6. Bejelentett hibák kezelése")
+
+            menu1 = {
+                1: 'asd',
+            }
+
         elif current_user[4] == 2:
             print("1. Önkormányzat dolgozóinak megtekintése")
             print("2. Önkormányzat eszközeinek megtekintése")
             print("3. Hibabejelentés")
             print("4. Új felhasználó felvétele az önkormányzathoz")
             print("5. Bejelentett hibák állapotának megtekintése")
+
+
         elif current_user[4] == 3:
             print("1. Önkormányzat dolgozóinak megtekintése")
             print("2. Önkormányzat eszközeinek megtekintése")
