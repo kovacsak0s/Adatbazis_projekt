@@ -113,7 +113,6 @@ def uj_eszkoz_rogzitese():
     con.commit()
     print("\nEszköz sikeresen rögzítve!\n")
 
-
 def fomenu():
     print("Belépés")
     if not belepes():
