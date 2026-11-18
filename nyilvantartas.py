@@ -83,7 +83,7 @@ def uj_eszkoz_rogzitese():
             onkormanyzat_id = talalat[0]
             break
         else:
-            print("Hiba: Nem található ilyen nevű önkormányzat! Próbálja újra.")
+            print("Nem található ilyen nevű önkormányzat! Próbálja újra.")
 
 
 
@@ -91,7 +91,7 @@ def uj_eszkoz_rogzitese():
         u_eszkoz_neve = input("Eszköz neve: ").strip()
         if u_eszkoz_neve:
             break
-        print("Hiba: Az eszköz nevét kötelező megadni!")
+        print("Az eszköz nevét kötelező megadni!")
 
 
     while True:
@@ -112,6 +112,21 @@ def uj_eszkoz_rogzitese():
     )
     con.commit()
     print("\nEszköz sikeresen rögzítve!\n")
+
+def uj_felhasznalo_hozzaadasa():
+    onkormanyzatok_listaja()
+
+    while True:
+        keresett_onkormanyzat = input("\nAdja meg az önkormányzat nevét, ahol az eszköz található: ").strip()
+        res = cur.execute("SELECT id FROM Onkormanyzat WHERE nev = ?", (keresett_onkormanyzat,))
+        talalat = res.fetchone()
+
+        if talalat is not None:
+            onkormanyzat_id = talalat[0]
+            break
+        else:
+            print("Nem található ilyen nevű önkormányzat! Próbálja újra.")
+
 
 def fomenu():
     print("Belépés")
@@ -136,7 +151,7 @@ def fomenu():
             adott_felhasznalohoz_tartozo_menu = {
                 1: uj_onkormanyzat_rogzitese,
                 2: uj_eszkoz_rogzitese,
-                # 3: uj_felhasznalo_hozzaadasa,
+                3: uj_felhasznalo_hozzaadasa,
                 # 4: meglevo_felhasznalok_szerkesztese,
                 # 5: tervezett_karbantartasok_kezelese,
                 # 6: bejelentett_hibak_kezelese,
@@ -156,7 +171,7 @@ def fomenu():
                 # 1: ,
                 # 2: ,
                 # 3: ,
-                # 4: uj_felhasznalo_hozzaadasa,
+                4: uj_felhasznalo_hozzaadasa,
                 # 5: ,
                 6: kilepes,
             }

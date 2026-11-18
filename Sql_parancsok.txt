@@ -1,7 +1,7 @@
 -- 1. Önkormányzatok tábla
 CREATE TABLE Onkormanyzat (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nev TEXT NOT NULL,
+    nev TEXT NOT NULL UNIQUE,
     email TEXT,
     telefonszam TEXT,
     cim TEXT,
@@ -30,7 +30,7 @@ CREATE TABLE Eszkoz (
 -- 4. Felhasználók tábla
 CREATE TABLE Felhasznalo (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    onkormanyzat_id INTEGER NOT NULL,
+    onkormanyzat_id INTEGER,
     nev TEXT NOT NULL,
     email TEXT,
     telefonszam TEXT,
