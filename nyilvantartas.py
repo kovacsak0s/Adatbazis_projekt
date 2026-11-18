@@ -127,6 +127,37 @@ def uj_felhasznalo_hozzaadasa():
         else:
             print("Nem található ilyen nevű önkormányzat! Próbálja újra.")
 
+#----------------------------------------
+
+def onkormanyzat_dolgozoi():
+    onkormanyzat_id = jelenlegi_felhasznalo[1]
+
+    if onkormanyzat_id is None:
+        print("Nincs hozzárendelve önkormányzat a felhasználóhoz.")
+        return
+
+    sql = """SELECT Onkormanyzat.nev, Felhasznalo.nev, Felhasznalo.email, 
+                Felhasznalo.telefonszam, Felhasznalo.felhasznaloi_szint
+                FROM Felhasznalo
+                INNER JOIN Onkormanyzat ON Felhasznalo.onkormanyzat_id = Onkormanyzat.id
+                WHERE Felhasznalo.onkormanyzat_id = ?
+                ORDER BY Felhasznalo.nev"""
+
+    res = cur.execute(sql, (onkormanyzat_id,))
+    dolgozok_listaja = res.fetchall()
+
+    print("\n-----------------------------------")
+    if len(dolgozok_listaja) > 0:
+        print(f"{dolgozok_listaja[0][0]} dolgozói:")
+        print("-----------------------------------")
+        for dolgozo in dolgozok_listaja:
+            email = dolgozo[2] if dolgozo[2] else "Nincs megadva"
+            tel = dolgozo[3] if dolgozo[3] else "Nincs megadva"
+            print(f"Név: {dolgozo[1]} | E-mail: {email} | Tel.: {tel}")
+    else:
+        print("Nincsenek rögzített dolgozók ehhez az önkormányzathoz.")
+    print("-----------------------------------\n")
+
 
 def fomenu():
     print("Belépés")
@@ -168,7 +199,7 @@ def fomenu():
             felhasznaloi_szinthez_tartozo_lehetosegek = 6
 
             adott_felhasznalohoz_tartozo_menu = {
-                # 1: ,
+                1: onkormanyzat_dolgozoi,
                 # 2: ,
                 # 3: ,
                 4: uj_felhasznalo_hozzaadasa,
@@ -183,7 +214,7 @@ def fomenu():
             felhasznaloi_szinthez_tartozo_lehetosegek = 3
 
             adott_felhasznalohoz_tartozo_menu = {
-                # 1: ,
+                1: onkormanyzat_dolgozoi,
                 # 2: ,
                 3: kilepes,
             }
@@ -208,5 +239,7 @@ def fomenu():
 fomenu()
 
 con.close()
+
+
 
 
