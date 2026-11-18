@@ -3,9 +3,7 @@ import sqlite3
 con = sqlite3.connect("szamitogepesrendszerek.db")
 cur = con.cursor()
 
-data2 = []         # Az utoljára listázott dalok tárolása a lejátszáshoz
-jelenlegi_felhasznalo = None  # A bejelentkezett felhasználó adatai
-
+jelenlegi_felhasznalo = None
 
 def belepes():
     global jelenlegi_felhasznalo
@@ -85,8 +83,6 @@ def uj_eszkoz_rogzitese():
         else:
             print("Nem található ilyen nevű önkormányzat! Próbálja újra.")
 
-
-
     while True:
         u_eszkoz_neve = input("Eszköz neve: ").strip()
         if u_eszkoz_neve:
@@ -117,7 +113,7 @@ def uj_felhasznalo_hozzaadasa():
     onkormanyzatok_listaja()
 
     while True:
-        keresett_onkormanyzat = input("\nAdja meg az önkormányzat nevét, ahol az eszköz található: ").strip()
+        keresett_onkormanyzat = input("\nAdja meg az önkormányzat nevét, ahova a felhasználót rögzíteni szeretné: ").strip()
         res = cur.execute("SELECT id FROM Onkormanyzat WHERE nev = ?", (keresett_onkormanyzat,))
         talalat = res.fetchone()
 
@@ -127,6 +123,48 @@ def uj_felhasznalo_hozzaadasa():
         else:
             print("Nem található ilyen nevű önkormányzat! Próbálja újra.")
 
+    while True:
+        u_felhasznalo_neve = input("Felhasználó neve: ").strip()
+        if u_felhasznalo_neve:
+            break
+        print("A felhasználó nevét kötelező megadni!")
+
+    while True:
+        try:
+            u_felhasznalo_szintje = int(input("Felhasználó szintje (2/3): ").strip())
+            if u_felhasznalo_szintje in (2, 3):
+                break
+            else:
+                print("A felhasználói szint csak 2 vagy 3 lehet!")
+        except ValueError:
+            print("A felhasználói szintnek számnak kell lennie!")
+
+    while True:
+        u_felhasznalo_bejelentkezesi_azonositoja = input("Felhasználó bejelentkezési azonosítója: ").strip()
+        if not u_felhasznalo_bejelentkezesi_azonositoja:
+            print("A bejelentkezési azonosítót kötelező megadni!")
+            continue
+
+        res = cur.execute(
+            "SELECT id FROM Felhasznalo WHERE bejelentkezesi_azonosito = ?",
+            (u_felhasznalo_bejelentkezesi_azonositoja,)
+        )
+        if res.fetchone() is not None:
+            print("Ez a bejelentkezési azonosító már foglalt! Adjon meg másikat.")
+            continue
+        break
+
+    u_felhasznalo_email = input("Felhasználó e-mail címe: ").strip() or None
+    u_felhasznalo_telefonszam = input("Felhasználó telefonszáma: ").strip() or None
+
+    cur.execute(
+        "INSERT INTO Felhasznalo (onkormanyzat_id, nev, email, telefonszam, felhasznaloi_szint, bejelentkezesi_azonosito) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (onkormanyzat_id, u_felhasznalo_neve, u_felhasznalo_email, u_felhasznalo_telefonszam,
+         u_felhasznalo_szintje, u_felhasznalo_bejelentkezesi_azonositoja)
+    )
+    con.commit()
+    print("\nFelhasználó sikeresen rögzítve!\n")
 
 def fomenu():
     print("Belépés")
