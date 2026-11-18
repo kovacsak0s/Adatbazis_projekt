@@ -151,3 +151,14 @@ INSERT INTO Hibabejelentes (id, felhasznalo_id, eszkoz_id, hibatipus_id, egyedi_
 (4, 9, 7, 4, 'Ügyfélfogadás közben kétszer is újraindult a gép kék képernyővel.', '2026-11-12', 'Folyamatban', NULL),
 (5, 11, 9, NULL, 'A szkennelés e-mailbe funkció nem küldi el a beszkennelt dokumentumokat a címzetteknek.', '2026-11-15', 'Nyitott', NULL),
 (6, 2, 1, 1, 'Reggel óta nem reagál a bekapcsológombra, a monitor sem kap jelet.', '2026-11-16', 'Nyitott', NULL);
+
+--8. 
+
+INSERT INTO Hibakezeles (id, hibabejelentes_id, datum, lepes_leirasa) VALUES
+(1, 1, '2026-10-12', 'Hiba távoli eléréssel megvizsgálva, nyomtató-illesztőprogram újratelepítve.'),
+(2, 1, '2026-10-13', 'Tesztnyomtatás sikeresen lefutott, az eszköz ismét üzemképes.'),
+(3, 2, '2026-10-15', 'Helyszíni kiszállás: a hálózati switch egyik portja meghibásodott, átkötve tartalék portra.'),
+(4, 2, '2026-10-15', 'Új 24 portos gigabites switch megrendelve a végleges cseréhez.'),
+(5, 3, '2026-10-18', 'Vírusirtó adatbázis frissítve, teljes rendszerellenőrzés elindítva.'),
+(6, 3, '2026-10-19', 'Kártevő eltávolítva, Windows biztonsági frissítések telepítve, felhasználói jelszó lecserélve.'),
+(7, 4, '2026-10-20', 'Tápegység-hiba diagnosztizálva, cserealkatrész beszerzése folyamatban.');
