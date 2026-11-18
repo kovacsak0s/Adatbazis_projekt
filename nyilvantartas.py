@@ -158,6 +158,35 @@ def onkormanyzat_dolgozoi():
         print("Nincsenek rögzített dolgozók ehhez az önkormányzathoz.")
     print("-----------------------------------\n")
 
+def onkormanyzat_eszkozei():
+    onkormanyzat_id = jelenlegi_felhasznalo[1]
+
+    if onkormanyzat_id is None:
+        print("Nincs hozzárendelve önkormányzat a felhasználóhoz.")
+        return
+
+    sql = """SELECT Onkormanyzat.nev, Eszkoz.eszkoz_neve, Eszkoz.leltari_szam, 
+                Eszkoz.beszerzes_datuma, Eszkoz.eszkoz_leirasa, Eszkoz.tipus
+                FROM Eszkoz
+                INNER JOIN Onkormanyzat ON Eszkoz.onkormanyzat_id = Onkormanyzat.id
+                WHERE Eszkoz.onkormanyzat_id = ?
+                ORDER BY Eszkoz.eszkoz_neve"""
+
+    res = cur.execute(sql, (onkormanyzat_id,))
+    eszkozok_listaja = res.fetchall()
+
+    print("\n-----------------------------------")
+    if len(eszkozok_listaja) > 0:
+        print(f"{eszkozok_listaja[0][0]} eszközei:")
+        print("-----------------------------------")
+        for eszkoz in eszkozok_listaja:
+            beszerzes_datuma = eszkoz[3] if eszkoz[3] else "Nincs megadva"
+            leiras = eszkoz[4] if eszkoz[4] else "Nincs megadva"
+            tipus = eszkoz[5] if eszkoz[5] else "Nincs megadva"
+            print(f"Eszköz neve: {eszkoz[1]} | Leltári szám: {eszkoz[2]} | Beszerzés dátuma: {beszerzes_datuma} | Leírás: {leiras} | Típus: {tipus}")
+    else:
+        print("Nincsenek rögzített eszközök ehhez az önkormányzathoz.")
+    print("-----------------------------------\n")
 
 def fomenu():
     print("Belépés")
@@ -200,7 +229,7 @@ def fomenu():
 
             adott_felhasznalohoz_tartozo_menu = {
                 1: onkormanyzat_dolgozoi,
-                # 2: ,
+                2: onkormanyzat_eszkozei,
                 # 3: ,
                 4: uj_felhasznalo_hozzaadasa,
                 # 5: ,
@@ -215,7 +244,7 @@ def fomenu():
 
             adott_felhasznalohoz_tartozo_menu = {
                 1: onkormanyzat_dolgozoi,
-                # 2: ,
+                2: onkormanyzat_eszkozei,
                 3: kilepes,
             }
 
