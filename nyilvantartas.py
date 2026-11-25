@@ -772,10 +772,10 @@ def belepesi_azonositok_listazasa():
     sql = """SELECT Belepesi_azonosito.id, Onkormanyzat.nev, Eszkoz.eszkoz_neve, Eszkoz.leltari_szam,
                     Belepesi_azonosito.rendszer_neve, Belepesi_azonosito.belepesi_azonosito,
                     Belepesi_azonosito.jelszo
-             FROM Belepesi_azonosito
-             INNER JOIN Eszkoz ON Belepesi_azonosito.eszkoz_id = Eszkoz.id
-             INNER JOIN Onkormanyzat ON Eszkoz.onkormanyzat_id = Onkormanyzat.id
-             ORDER BY Onkormanyzat.nev, Eszkoz.eszkoz_neve"""
+            FROM Belepesi_azonosito
+            INNER JOIN Eszkoz ON Belepesi_azonosito.eszkoz_id = Eszkoz.id
+            INNER JOIN Onkormanyzat ON Eszkoz.onkormanyzat_id = Onkormanyzat.id
+            ORDER BY Onkormanyzat.nev, Eszkoz.eszkoz_neve"""
     res = cur.execute(sql)
     azonositok = res.fetchall()
 
@@ -854,8 +854,8 @@ def belepesi_azonosito_modositasa():
 
     cur.execute(
         """UPDATE Belepesi_azonosito
-           SET rendszer_neve = ?, belepesi_azonosito = ?, jelszo = ?
-           WHERE id = ?""",
+            SET rendszer_neve = ?, belepesi_azonosito = ?, jelszo = ?
+            WHERE id = ?""",
         (uj_rendszer, uj_azonosito, uj_jelszo, b_id)
     )
     con.commit()
@@ -940,6 +940,9 @@ def onkormanyzat_dolgozoi():
     else:
         print("Nincsenek rögzített dolgozók ehhez az önkormányzathoz.")
     print("-----------------------------------\n")
+
+
+
 def onkormanyzat_eszkozei():
     onkormanyzat_id = jelenlegi_felhasznalo[1]
 
@@ -970,6 +973,131 @@ def onkormanyzat_eszkozei():
         print("Nincsenek rögzített eszközök ehhez az önkormányzathoz.")
     print("-----------------------------------\n")
 
+
+
+def hibabejelentes():
+    onkormanyzat_id = jelenlegi_felhasznalo[1]
+    felhasznalo_id = jelenlegi_felhasznalo[6]
+
+    if onkormanyzat_id is None:
+        print("\nEhhez a felhasználóhoz nincs önkormányzat rendelve!\n")
+        return
+
+    res = cur.execute("SELECT id, eszkoz_neve, leltari_szam FROM Eszkoz WHERE onkormanyzat_id = ?", [onkormanyzat_id])
+    eszkozok = res.fetchall()
+
+    if len(eszkozok) == 0:
+        print("\nEhhez az önkormányzathoz nincsenek rögzített eszközök!\n")
+        return
+
+
+    print("\n--- Választható eszközök ---")
+    ervenyes_eszkoz_idk = []
+    for e in eszkozok:
+        print(f"ID: {e[0]} | {e[1]} (Leltári sz.: {e[2]})")
+        ervenyes_eszkoz_idk.append(e[0])
+
+    while True:
+        try:
+            kivalasztott_eszkoz_id = int(input("\nAdja meg a hibás eszköz ID-ját: ").strip())
+            if kivalasztott_eszkoz_id in ervenyes_eszkoz_idk:
+                break
+            print("Hibás ID! A fenti listából válasszon.")
+        except ValueError:
+            print("Kérjük egy számot adjon meg!")
+
+
+    res = cur.execute("SELECT id, megnevezes, kategoria FROM Hibatipus")
+    hibatipusok = res.fetchall()
+
+    print("\n--- Hibatípusok ---")
+    ervenyes_hibatipus_idk = []
+    for h in hibatipusok:
+        print(f"ID: {h[0]} | {h[1]} ({h[2]})")
+        ervenyes_hibatipus_idk.append(h[0])
+
+    while True:
+        valasztott_tipus = input("\nAdja meg a hibatípus ID-ját (Enter, ha egyik sem): ").strip()
+        if valasztott_tipus == "":
+            hibatipus_id = None
+            break
+        try:
+            hibatipus_id = int(valasztott_tipus)
+            if hibatipus_id in ervenyes_hibatipus_idk:
+                break
+            print("Hibás ID! A listából válasszon vagy nyomjon Entert.")
+        except ValueError:
+            print("Kérjük egy számot adjon meg!")
+
+
+    while True:
+        egyedi_komment = input("\nÍrja le részletesen a hibát: ").strip()
+        if egyedi_komment:
+            break
+        print("A hiba szöveges leírását kötelező megadni!")
+
+    bejelentes_datuma = str(date.today())
+    allapot = "Nyitott"
+
+    cur.execute(
+        """INSERT INTO Hibabejelentes 
+           (felhasznalo_id, eszkoz_id, hibatipus_id, egyedi_komment, bejelentes_datuma, allapot, elharitas_datuma)
+           VALUES (?, ?, ?, ?, ?, ?, NULL)""",
+        (felhasznalo_id, kivalasztott_eszkoz_id, hibatipus_id, egyedi_komment, bejelentes_datuma, allapot)
+    )
+    con.commit()
+    print("\nHibabejelentés sikeresen rögzítve!\n")
+
+
+
+def bejelentett_hibak_allapota():
+    onkormanyzat_id = jelenlegi_felhasznalo[1]
+
+    if onkormanyzat_id is None:
+        print("\nEhhez a felhasználóhoz nincs önkormányzat rendelve!\n")
+        return
+
+    sql = """SELECT Hibabejelentes.id,
+                    Eszkoz.eszkoz_neve,
+                    Eszkoz.leltari_szam,
+                    Felhasznalo.nev,
+                    Hibatipus.megnevezes,
+                    Hibabejelentes.egyedi_komment,
+                    Hibabejelentes.bejelentes_datuma,
+                    Hibabejelentes.allapot,
+                    Hibabejelentes.elharitas_datuma
+            FROM Hibabejelentes
+            INNER JOIN Eszkoz ON Hibabejelentes.eszkoz_id = Eszkoz.id
+            INNER JOIN Felhasznalo ON Hibabejelentes.felhasznalo_id = Felhasznalo.id
+            LEFT JOIN Hibatipus ON Hibabejelentes.hibatipus_id = Hibatipus.id
+            WHERE Eszkoz.onkormanyzat_id = ?
+            ORDER BY Hibabejelentes.bejelentes_datuma DESC, Hibabejelentes.id DESC"""
+
+    res = cur.execute(sql, [onkormanyzat_id])
+    hibak = res.fetchall()
+
+    print("\n===================================")
+    if len(hibak) > 0:
+        print("Bejelentett hibák állapota:")
+        print("===================================")
+        for h in hibak:
+            tipus = h[4] if h[4] else "Egyéb / Nincs megadva"
+            komment = h[5] if h[5] else "Nincs leírás"
+            elharitva = h[8] if h[8] else "Még folyamatban / Nyitott"
+
+            print(f"ID: {h[0]} | Állapot: {h[7]} | Bejelentve: {h[6]}")
+            print(f"   Eszköz: {h[1]} (Leltári sz.: {h[2]})")
+            print(f"   Bejelentő: {h[3]} | Típus: {tipus}")
+            print(f"   Leírás: {komment}")
+            print(f"   Elhárítás dátuma: {elharitva}")
+            print("-----------------------------------")
+    else:
+        print("Nincsenek bejelentett hibák ehhez az önkormányzathoz.")
+        print("===================================")
+    print()
+
+
+
 def onkormanyzat_karbantartasai():
     onkormanyzat_id = jelenlegi_felhasznalo[1]
     if onkormanyzat_id is None:
@@ -978,10 +1106,10 @@ def onkormanyzat_karbantartasai():
 
     sql = """SELECT Eszkoz.eszkoz_neve, Eszkoz.leltari_szam,
                     Karbantartas.tervezett_datum, Karbantartas.vegrehajtas_datuma, Karbantartas.leiras
-             FROM Karbantartas
-             INNER JOIN Eszkoz ON Karbantartas.eszkoz_id = Eszkoz.id
-             WHERE Eszkoz.onkormanyzat_id = ?
-             ORDER BY Karbantartas.tervezett_datum DESC"""
+            FROM Karbantartas
+            INNER JOIN Eszkoz ON Karbantartas.eszkoz_id = Eszkoz.id
+            WHERE Eszkoz.onkormanyzat_id = ?
+            ORDER BY Karbantartas.tervezett_datum DESC"""
     res = cur.execute(sql, (onkormanyzat_id,))
     karbantartasok = res.fetchall()
 
@@ -1039,9 +1167,9 @@ def fomenu():
             adott_felhasznalohoz_tartozo_menu = {
                 1: onkormanyzat_dolgozoi,
                 2: onkormanyzat_eszkozei,
-                # 3: ,
+                3: hibabejelentes,
                 4: uj_felhasznalo_hozzaadasa,
-                # 5: ,
+                5: bejelentett_hibak_allapota,
                 6: onkormanyzat_karbantartasai,
                 7: kilepes,
             }
